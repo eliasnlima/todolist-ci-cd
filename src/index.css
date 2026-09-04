@@ -174,3 +174,36 @@ button {
 .link:hover {
   color: var(--text);
 }
+
+.edit {
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+}
+
+.edit:hover {
+  color: var(--accent);
+}
+
+.item.editing {
+  gap: 0.4rem;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+}
+
+.save {
+  padding: 0.4rem 0.75rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+}

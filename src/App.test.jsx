@@ -85,6 +85,92 @@ describe('App', () => {
     expect(screen.queryByText('Sai')).not.toBeInTheDocument()
   })
 
+  it('edita o texto de uma tarefa', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Comprar pao')
+    await user.click(screen.getByRole('button', { name: 'Editar Comprar pao' }))
+
+    const campo = screen.getByLabelText('Editar tarefa')
+    await user.clear(campo)
+    await user.type(campo, 'Comprar pão integral')
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    expect(screen.getByText('Comprar pão integral')).toBeInTheDocument()
+    expect(screen.queryByText('Comprar pao')).not.toBeInTheDocument()
+  })
+
+  it('salva a edição com Enter', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Versao antiga')
+    await user.click(screen.getByRole('button', { name: 'Editar Versao antiga' }))
+
+    const campo = screen.getByLabelText('Editar tarefa')
+    await user.clear(campo)
+    await user.type(campo, 'Versao nova{Enter}')
+
+    expect(screen.getByText('Versao nova')).toBeInTheDocument()
+  })
+
+  it('cancela a edição sem alterar a tarefa', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Texto original')
+    await user.click(screen.getByRole('button', { name: 'Editar Texto original' }))
+
+    const campo = screen.getByLabelText('Editar tarefa')
+    await user.clear(campo)
+    await user.type(campo, 'Texto descartado')
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(screen.getByText('Texto original')).toBeInTheDocument()
+    expect(screen.queryByText('Texto descartado')).not.toBeInTheDocument()
+  })
+
+  it('cancela a edição com Escape', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Continua igual')
+    await user.click(screen.getByRole('button', { name: 'Editar Continua igual' }))
+
+    await user.type(screen.getByLabelText('Editar tarefa'), '{Escape}')
+
+    expect(screen.getByText('Continua igual')).toBeInTheDocument()
+  })
+
+  it('não permite salvar uma tarefa em branco', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Nao pode sumir')
+    await user.click(screen.getByRole('button', { name: 'Editar Nao pode sumir' }))
+
+    await user.clear(screen.getByLabelText('Editar tarefa'))
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    expect(screen.getByText('Nao pode sumir')).toBeInTheDocument()
+  })
+
+  it('mantém a edição depois de recarregar a página', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<App />)
+
+    await adicionarTarefa(user, 'Antes')
+    await user.click(screen.getByRole('button', { name: 'Editar Antes' }))
+    const campo = screen.getByLabelText('Editar tarefa')
+    await user.clear(campo)
+    await user.type(campo, 'Depois{Enter}')
+    unmount()
+
+    render(<App />)
+    expect(screen.getByText('Depois')).toBeInTheDocument()
+  })
+
   it('mantém as tarefas depois de recarregar a página', async () => {
     const user = userEvent.setup()
     const { unmount } = render(<App />)
