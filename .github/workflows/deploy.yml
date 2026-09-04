@@ -38,7 +38,7 @@ jobs:
       - name: Build e push da imagem
         run: |
           docker build \
-            -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} \           
+            -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} \
             -t ghcr.io/${{ github.repository }}:${{ github.sha }} \
             .
           docker push --all-tags ghcr.io/${{ github.repository }}
