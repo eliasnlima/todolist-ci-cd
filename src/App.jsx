@@ -25,6 +25,12 @@ export default function App() {
     )
   }
 
+  function editTodo(id, text) {
+    setTodos((current) =>
+      current.map((todo) => (todo.id === id ? { ...todo, text } : todo)),
+    )
+  }
+
   function removeTodo(id) {
     setTodos((current) => current.filter((todo) => todo.id !== id))
   }
@@ -53,6 +59,7 @@ export default function App() {
         todos={visibleTodos}
         onToggle={toggleTodo}
         onRemove={removeTodo}
+        onEdit={editTodo}
       />
 
       <footer className="footer">
