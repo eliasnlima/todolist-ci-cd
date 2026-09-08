@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { PRIORITIES, PRIORITY_DEFAULT } from '../constants/priorities.js'
 
-export default function TodoItem({ todo, onToggle, onRemove, onEdit }) {
+export default function TodoItem({ todo, onToggle, onRemove, onEdit, onChangePriority }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(todo.text)
+
+  const priority = todo.priority ?? PRIORITY_DEFAULT
 
   function startEditing() {
     setDraft(todo.text)
@@ -47,7 +50,7 @@ export default function TodoItem({ todo, onToggle, onRemove, onEdit }) {
   }
 
   return (
-    <li className={todo.done ? 'item done' : 'item'}>
+    <li className={todo.done ? 'item done' : 'item'} data-priority={priority}>
       <label>
         <input
           type="checkbox"
@@ -56,6 +59,18 @@ export default function TodoItem({ todo, onToggle, onRemove, onEdit }) {
         />
         <span onDoubleClick={startEditing}>{todo.text}</span>
       </label>
+      <select
+        className="priority-select"
+        value={priority}
+        onChange={(event) => onChangePriority(todo.id, event.target.value)}
+        aria-label={`Prioridade de ${todo.text}`}
+      >
+        {PRIORITIES.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
       <button
         type="button"
         className="edit"

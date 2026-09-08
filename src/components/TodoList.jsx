@@ -1,6 +1,6 @@
 import TodoItem from './TodoItem.jsx'
 
-export default function TodoList({ todos, onToggle, onRemove, onEdit }) {
+export default function TodoList({ todos, onToggle, onRemove, onEdit, onChangePriority }) {
   if (todos.length === 0) {
     return <p className="empty">Nada por aqui.</p>
   }
@@ -14,6 +14,7 @@ export default function TodoList({ todos, onToggle, onRemove, onEdit }) {
           onToggle={onToggle}
           onRemove={onRemove}
           onEdit={onEdit}
+          onChangePriority={onChangePriority}
         />
       ))}
     </ul>

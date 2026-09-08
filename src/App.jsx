@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage.js'
 import { gerarId } from './utils/id.js'
+import { PRIORITY_DEFAULT, priorityRank } from './constants/priorities.js'
 import TodoForm from './components/TodoForm.jsx'
 import TodoList from './components/TodoList.jsx'
 import TodoFilters from './components/TodoFilters.jsx'
@@ -11,10 +12,10 @@ export default function App() {
   const [todos, setTodos] = useLocalStorage(STORAGE_KEY, [])
   const [filter, setFilter] = useState('all')
 
-  function addTodo(text) {
+  function addTodo(text, priority = PRIORITY_DEFAULT) {
     setTodos((current) => [
       ...current,
-      { id: gerarId(), text, done: false },
+      { id: gerarId(), text, done: false, priority },
     ])
   }
 
@@ -32,6 +33,12 @@ export default function App() {
     )
   }
 
+  function changePriority(id, priority) {
+    setTodos((current) =>
+      current.map((todo) => (todo.id === id ? { ...todo, priority } : todo)),
+    )
+  }
+
   function removeTodo(id) {
     setTodos((current) => current.filter((todo) => todo.id !== id))
   }
@@ -41,9 +48,18 @@ export default function App() {
   }
 
   const visibleTodos = useMemo(() => {
-    if (filter === 'active') return todos.filter((todo) => !todo.done)
-    if (filter === 'done') return todos.filter((todo) => todo.done)
-    return todos
+    const filtered =
+      filter === 'active'
+        ? todos.filter((todo) => !todo.done)
+        : filter === 'done'
+          ? todos.filter((todo) => todo.done)
+          : todos
+
+    // Ordena por prioridade. O sort do JS é estável, então tarefas de
+    // mesma prioridade mantêm a ordem em que foram criadas.
+    return [...filtered].sort(
+      (a, b) => priorityRank(a.priority) - priorityRank(b.priority),
+    )
   }, [todos, filter])
 
   const remaining = todos.filter((todo) => !todo.done).length
@@ -61,6 +77,7 @@ export default function App() {
         onToggle={toggleTodo}
         onRemove={removeTodo}
         onEdit={editTodo}
+        onChangePriority={changePriority}
       />
 
       <footer className="footer">
