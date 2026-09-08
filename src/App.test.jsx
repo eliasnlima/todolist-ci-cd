@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
@@ -9,6 +9,10 @@ async function adicionarTarefa(user, texto) {
 }
 
 describe('App', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   it('mostra o estado vazio no primeiro acesso', () => {
     render(<App />)
     expect(screen.getByText('Nada por aqui.')).toBeInTheDocument()
@@ -169,6 +173,19 @@ describe('App', () => {
 
     render(<App />)
     expect(screen.getByText('Depois')).toBeInTheDocument()
+  })
+
+  it('adiciona tarefa sem crypto.randomUUID (acesso por IP, sem HTTPS)', async () => {
+    vi.stubGlobal('crypto', {
+      getRandomValues: globalThis.crypto.getRandomValues.bind(globalThis.crypto),
+    })
+
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Funciona sem HTTPS')
+
+    expect(screen.getByText('Funciona sem HTTPS')).toBeInTheDocument()
   })
 
   it('mantém as tarefas depois de recarregar a página', async () => {
