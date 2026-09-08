@@ -3,9 +3,21 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
 
-async function adicionarTarefa(user, texto) {
+async function adicionarTarefa(user, texto, prioridade) {
   await user.type(screen.getByLabelText('Nova tarefa'), texto)
+  if (prioridade) {
+    await user.selectOptions(
+      screen.getByLabelText('Prioridade da nova tarefa'),
+      prioridade,
+    )
+  }
   await user.click(screen.getByRole('button', { name: 'Adicionar' }))
+}
+
+function ordemVisivel() {
+  return screen
+    .getAllByRole('listitem')
+    .map((item) => item.querySelector('label span').textContent)
 }
 
 describe('App', () => {
@@ -186,6 +198,90 @@ describe('App', () => {
     await adicionarTarefa(user, 'Funciona sem HTTPS')
 
     expect(screen.getByText('Funciona sem HTTPS')).toBeInTheDocument()
+  })
+
+  it('cria a tarefa com prioridade média por padrão', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Sem prioridade definida')
+
+    expect(screen.getByLabelText('Prioridade de Sem prioridade definida')).toHaveValue('media')
+  })
+
+  it('cria a tarefa com a prioridade escolhida', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Urgente', 'alta')
+
+    expect(screen.getByLabelText('Prioridade de Urgente')).toHaveValue('alta')
+  })
+
+  it('ordena a lista por prioridade, e não por ordem de criação', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Tranquila', 'baixa')
+    await adicionarTarefa(user, 'Normal', 'media')
+    await adicionarTarefa(user, 'Correndo', 'alta')
+
+    expect(ordemVisivel()).toEqual(['Correndo', 'Normal', 'Tranquila'])
+  })
+
+  it('mantém a ordem de criação entre tarefas de mesma prioridade', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Primeira', 'alta')
+    await adicionarTarefa(user, 'Segunda', 'alta')
+    await adicionarTarefa(user, 'Terceira', 'alta')
+
+    expect(ordemVisivel()).toEqual(['Primeira', 'Segunda', 'Terceira'])
+  })
+
+  it('reordena a lista ao mudar a prioridade de uma tarefa', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await adicionarTarefa(user, 'Comeca embaixo', 'baixa')
+    await adicionarTarefa(user, 'Comeca em cima', 'alta')
+
+    expect(ordemVisivel()).toEqual(['Comeca em cima', 'Comeca embaixo'])
+
+    await user.selectOptions(
+      screen.getByLabelText('Prioridade de Comeca embaixo'),
+      'alta',
+    )
+    await user.selectOptions(
+      screen.getByLabelText('Prioridade de Comeca em cima'),
+      'baixa',
+    )
+
+    expect(ordemVisivel()).toEqual(['Comeca embaixo', 'Comeca em cima'])
+  })
+
+  it('trata tarefas salvas antes da feature como prioridade média', () => {
+    window.localStorage.setItem(
+      'todos',
+      JSON.stringify([{ id: '1', text: 'Tarefa antiga', done: false }]),
+    )
+
+    render(<App />)
+
+    expect(screen.getByText('Tarefa antiga')).toBeInTheDocument()
+    expect(screen.getByLabelText('Prioridade de Tarefa antiga')).toHaveValue('media')
+  })
+
+  it('mantém a prioridade depois de recarregar a página', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<App />)
+
+    await adicionarTarefa(user, 'Continua alta', 'alta')
+    unmount()
+
+    render(<App />)
+    expect(screen.getByLabelText('Prioridade de Continua alta')).toHaveValue('alta')
   })
 
   it('mantém as tarefas depois de recarregar a página', async () => {

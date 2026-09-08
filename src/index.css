@@ -207,3 +207,41 @@ button {
   color: #fff;
   font-size: 0.85rem;
 }
+
+.priority-select {
+  padding: 0.25rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.form .priority-select {
+  padding: 0.6rem 0.4rem;
+  font-size: 0.85rem;
+}
+
+/* Faixa colorida à esquerda indicando a prioridade */
+.item[data-priority] {
+  border-left: 3px solid transparent;
+  padding-left: 0.6rem;
+}
+
+.item[data-priority='alta'] {
+  border-left-color: #dc2626;
+}
+
+.item[data-priority='media'] {
+  border-left-color: #d97706;
+}
+
+.item[data-priority='baixa'] {
+  border-left-color: #16a34a;
+}
+
+.item.done[data-priority] {
+  border-left-color: var(--border);
+}
