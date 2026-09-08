@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLocalStorage } from './hooks/useLocalStorage.js'
+import { gerarId } from './utils/id.js'
 import TodoForm from './components/TodoForm.jsx'
 import TodoList from './components/TodoList.jsx'
 import TodoFilters from './components/TodoFilters.jsx'
@@ -13,7 +14,7 @@ export default function App() {
   function addTodo(text) {
     setTodos((current) => [
       ...current,
-      { id: crypto.randomUUID(), text, done: false },
+      { id: gerarId(), text, done: false },
     ])
   }
 
