@@ -1,7 +1,7 @@
 services:
   todolist:
-    image: todolist:latest
-    container_name: todolist
+    image: ghcr.io/eliasnlima/todolist-ci-cd:main
+    container_name: todolist-main
     ports:
       - "8080:80"
     restart: unless-stopped

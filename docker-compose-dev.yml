@@ -1,6 +1,6 @@
 services:
   todolist:
-    image: todolist:latest
+    image: ghcr.io/eliasnlima/todolist-ci-cd:dev
     container_name: todolist-dev
     ports:
       - "3001:80"
